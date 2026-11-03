@@ -1,15 +1,34 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function LoginPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  function handleLogin(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    alert("Login UI working! Backend authentication will be connected later.");
+
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error || "Login failed");
+      return;
+    }
+
+    // Send each role to its own dashboard.
+    const role = data.user.role;
+    if (role === "ADMIN") router.push("/admin");
+    else if (role === "ORGANIZER") router.push("/organizer");
+    else router.push("/dashboard");
   }
 
   return (
@@ -76,7 +95,7 @@ export default function LoginPage() {
         </form>
 
         <p className="text-center text-gray-600 mt-6">
-          Don't have an account?{" "}
+          Don&apos;t have an account?{" "}
           <Link href="/register" className="text-blue-600 font-semibold hover:underline">
             Register
           </Link>
@@ -86,4 +105,3 @@ export default function LoginPage() {
     </div>
   );
 }
-
