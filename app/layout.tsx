@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 import Navbar from "./components/Navbar";
 
@@ -15,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Navbar />
+        <Suspense fallback={null}>
+          <Navbar />
+        </Suspense>
         {children}
       </body>
     </html>

@@ -1,16 +1,18 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function RegisterPage() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [srn, setSrn] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  function handleRegister(e: React.FormEvent) {
+  async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
 
     if (password !== confirmPassword) {
@@ -18,7 +20,20 @@ export default function RegisterPage() {
       return;
     }
 
-    alert("Registration UI working! Backend will be connected later.");
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, srn, password }),
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.error || "Registration failed");
+      return;
+    }
+
+    alert("Account created! Please log in.");
+    router.push("/login");
   }
 
   return (
@@ -130,4 +145,3 @@ export default function RegisterPage() {
     </div>
   );
 }
-
