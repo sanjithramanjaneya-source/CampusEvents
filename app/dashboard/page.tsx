@@ -129,7 +129,12 @@ export default function DashboardPage() {
 
           <div className="space-y-4">
             {items?.map((item) => {
-              const b = badge[item.registration_status];
+              const b =
+              item.event_status === "CANCELLED"
+               ? { label: "Event cancelled", style: "bg-red-100 text-red-700" }
+               : badge[item.registration_status];
+
+
               return (
                 <div
                   key={item.registration_id}
@@ -159,7 +164,9 @@ export default function DashboardPage() {
                     >
                       {b.label}
                     </span>
-                    {item.registration_status === "REGISTERED" && (
+                    {item.registration_status === "REGISTERED" &&
+                      item.event_status !== "CANCELLED" && (
+
                       <button
                         onClick={() => cancel(item.event_id)}
                         className="text-red-600 border border-red-300 px-4 py-2 rounded-lg hover:bg-red-50"

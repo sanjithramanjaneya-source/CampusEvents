@@ -55,3 +55,24 @@ export async function destroySession() {
   }
   store.delete(COOKIE_NAME);
 }
+
+
+
+// Use at the top of any API that only certain roles may call.
+export async function requireRole(...roles: SessionUser["role"][]) {
+  const user = await getCurrentUser();
+  if (!user) {
+    return {
+      error: Response.json({ error: "Please log in." }, { status: 401 }),
+    } as const;
+  }
+  if (!roles.includes(user.role)) {
+    return {
+      error: Response.json(
+        { error: "You do not have permission to do this." },
+        { status: 403 }
+      ),
+    } as const;
+  }
+  return { user } as const;
+}

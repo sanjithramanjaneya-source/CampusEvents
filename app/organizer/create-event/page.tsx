@@ -1,41 +1,84 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import type { Venue } from "@/lib/types";
 
 export default function CreateEventPage() {
+  const router = useRouter();
   const [eventName, setEventName] = useState("");
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("Technical");
   const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [venue, setVenue] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
+  const [venueId, setVenueId] = useState("");
   const [participants, setParticipants] = useState("");
-  const [organizer, setOrganizer] = useState("");
+  const [venues, setVenues] = useState<Venue[]>([]);
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  useEffect(() => {
+    fetch("/api/venues")
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) setVenues(data);
+      })
+      .catch(() => setError("Could not load venues."));
+  }, []);
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
+    setBusy(true);
 
-    alert("Event created successfully! Backend will be connected later.");
+    try {
+      const res = await fetch("/api/organizer/events", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: eventName,
+          description,
+          category,
+          venueId: Number(venueId),
+          date,
+          startTime,
+          endTime,
+          attendees: Number(participants),
+        }),
+      });
+      const data = await res.json();
+
+      if (res.status === 401) {
+        router.push("/login");
+        return;
+      }
+      if (!res.ok) {
+        setError(data.error || "Could not create the event.");
+        return;
+      }
+
+      alert("Event submitted! It will go live once an admin approves it.");
+      router.push("/organizer");
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow-sm px-8 py-5 flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold text-blue-600">
-          CampusEvents
-        </Link>
-
+      <main className="max-w-3xl mx-auto px-6 py-10">
         <Link
           href="/organizer"
-          className="text-gray-700 hover:text-blue-600"
+          className="text-blue-600 hover:text-blue-800 font-medium"
         >
-          Back to Dashboard
+          ← Back to Dashboard
         </Link>
-      </nav>
 
-      <main className="max-w-3xl mx-auto px-6 py-10">
-        <div className="bg-white p-8 rounded-2xl shadow-sm">
+        <div className="bg-white p-8 rounded-2xl shadow-sm mt-4">
           <h1 className="text-3xl font-bold text-gray-900">
             Create New Event
           </h1>
@@ -55,6 +98,7 @@ export default function CreateEventPage() {
                 onChange={(e) => setEventName(e.target.value)}
                 placeholder="Enter event name"
                 required
+                maxLength={150}
                 className="w-full p-3 border border-gray-300 rounded-lg bg-white text-black"
               />
             </div>
@@ -90,7 +134,7 @@ export default function CreateEventPage() {
               </select>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
                 <label className="block text-gray-800 font-medium mb-2">
                   Event Date
@@ -106,12 +150,25 @@ export default function CreateEventPage() {
 
               <div>
                 <label className="block text-gray-800 font-medium mb-2">
-                  Event Time
+                  Start Time
                 </label>
                 <input
                   type="time"
-                  value={time}
-                  onChange={(e) => setTime(e.target.value)}
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  required
+                  className="w-full p-3 border border-gray-300 rounded-lg bg-white text-black"
+                />
+              </div>
+
+              <div>
+                <label className="block text-gray-800 font-medium mb-2">
+                  End Time
+                </label>
+                <input
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
                   required
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white text-black"
                 />
@@ -122,50 +179,46 @@ export default function CreateEventPage() {
               <label className="block text-gray-800 font-medium mb-2">
                 Venue
               </label>
-              <input
-                type="text"
-                value={venue}
-                onChange={(e) => setVenue(e.target.value)}
-                placeholder="Enter event venue"
+              <select
+                value={venueId}
+                onChange={(e) => setVenueId(e.target.value)}
                 required
                 className="w-full p-3 border border-gray-300 rounded-lg bg-white text-black"
-              />
+              >
+                <option value="">Select a venue</option>
+                {venues.map((v) => (
+                  <option key={v.venue_id} value={v.venue_id}>
+                    {v.venue_name} - {v.location} (capacity {v.capacity})
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
               <label className="block text-gray-800 font-medium mb-2">
-                Maximum Participants
+                Expected Participants
               </label>
               <input
                 type="number"
                 value={participants}
                 onChange={(e) => setParticipants(e.target.value)}
-                placeholder="Enter participant limit"
+                placeholder="Enter expected number of participants"
                 min="1"
                 required
                 className="w-full p-3 border border-gray-300 rounded-lg bg-white text-black"
               />
             </div>
 
-            <div>
-              <label className="block text-gray-800 font-medium mb-2">
-                Organizer Name
-              </label>
-              <input
-                type="text"
-                value={organizer}
-                onChange={(e) => setOrganizer(e.target.value)}
-                placeholder="Enter organizer name"
-                required
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white text-black"
-              />
-            </div>
+            {error && (
+              <p className="rounded-lg bg-red-100 p-4 text-red-700">{error}</p>
+            )}
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition"
+              disabled={busy}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition disabled:opacity-50"
             >
-              Publish Event
+              {busy ? "Submitting..." : "Submit for Approval"}
             </button>
           </form>
         </div>
@@ -173,4 +226,3 @@ export default function CreateEventPage() {
     </div>
   );
 }
-

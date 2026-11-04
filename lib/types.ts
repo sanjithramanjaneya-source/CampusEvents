@@ -34,3 +34,25 @@ export type MyRegistration = {
   venue_name: string;
   location: string;
 };
+
+
+export type Venue = {
+  venue_id: number;
+  venue_name: string;
+  location: string;
+  capacity: number;
+  venue_type: string | null;
+};
+
+export type OrganizerEvent = {
+  event_id: number;
+  event_name: string;
+  category: string;
+  start_time: string;
+  end_time: string;
+  expected_attendees: number;
+  status: string;
+  venue_name: string;
+  capacity: number;
+  registered_count: number;
+};
