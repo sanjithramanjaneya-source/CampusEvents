@@ -12,7 +12,8 @@ export type EventItem = {
   capacity: number;
   organizer_name: string;
   registered_count: number;
-  crowd_level: "LOW" | "MEDIUM" | "HIGH" | "UNKNOWN";
+    crowd_level: "LOW" | "MEDIUM" | "HIGH" | "FULL" | "UNKNOWN";
+  registration_deadline: string;
 };
 
 export type EventDetail = EventItem & {
@@ -55,4 +56,52 @@ export type OrganizerEvent = {
   venue_name: string;
   capacity: number;
   registered_count: number;
+};
+
+
+
+export type AdminOverview = {
+  stats: {
+    students: number;
+    organizers: number;
+    total_events: number;
+    pending_events: number;
+    total_registrations: number;
+  };
+  by_status: { status: string; count: number }[];
+  top_events: {
+    event_id: number;
+    event_name: string;
+    capacity: number;
+    registrations: number;
+  }[];
+  recent_activity: {
+    audit_id: number;
+    action_type: string;
+    description: string;
+    action_time: string;
+    user_name: string | null;
+  }[];
+};
+
+export type AdminEvent = {
+  event_id: number;
+  event_name: string;
+  category: string;
+  start_time: string;
+  end_time: string;
+  expected_attendees: number;
+  status: string;
+  organizer_name: string;
+  venue_name: string;
+  capacity: number;
+};
+
+export type AdminUser = {
+  user_id: number;
+  full_name: string;
+  email: string;
+  srn: string | null;
+  role: "STUDENT" | "ORGANIZER" | "ADMIN";
+  created_at: string;
 };

@@ -11,7 +11,8 @@ const statusStyle: Record<string, { label: string; style: string }> = {
   APPROVED: { label: "Approved", style: "bg-green-100 text-green-700" },
   ONGOING: { label: "Ongoing", style: "bg-blue-100 text-blue-700" },
   COMPLETED: { label: "Completed", style: "bg-gray-100 text-gray-700" },
-  CANCELLED: { label: "Cancelled", style: "bg-red-100 text-red-700" },
+    CANCELLED: { label: "Cancelled", style: "bg-red-100 text-red-700" },
+  REJECTED: { label: "Rejected", style: "bg-red-100 text-red-700" },
 };
 
 export default function OrganizerPage() {
@@ -124,7 +125,9 @@ export default function OrganizerPage() {
               const canCancel = ["PENDING", "APPROVED", "ONGOING"].includes(
                 event.status
               );
-              const canDelete = ["PENDING", "CANCELLED"].includes(event.status);
+              const canDelete = ["PENDING", "CANCELLED", "REJECTED"].includes(
+                event.status
+              );
               return (
                 <div
                   key={event.event_id}

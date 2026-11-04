@@ -1,16 +1,19 @@
 import type { RowDataPacket } from "mysql2";
 import { pool } from "@/lib/db";
 
+// Public event list. ?q=search &category=Technical &past=1 (include finished events)
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const q = (searchParams.get("q") ?? "").trim();
     const category = (searchParams.get("category") ?? "").trim();
+    const past = searchParams.get("past") === "1";
 
     let sql = `
       SELECT
         e.event_id, e.event_name, e.description, e.category,
-        e.start_time, e.end_time, e.expected_attendees, e.status,
+        e.start_time, e.end_time, e.registration_deadline,
+        e.expected_attendees, e.status,
         v.venue_name, v.location, v.capacity,
         u.full_name AS organizer_name,
         CountActiveRegistrations(e.event_id) AS registered_count,
@@ -18,7 +21,7 @@ export async function GET(request: Request) {
       FROM events e
       JOIN venues v ON e.venue_id = v.venue_id
       JOIN users u ON e.organizer_id = u.user_id
-      WHERE e.status IN ('APPROVED', 'ONGOING')`;
+      WHERE e.status IN (${past ? "'APPROVED', 'ONGOING', 'COMPLETED'" : "'APPROVED', 'ONGOING'"})`;
     const params: string[] = [];
 
     if (q) {
@@ -29,12 +32,13 @@ export async function GET(request: Request) {
       sql += " AND e.category = ?";
       params.push(category);
     }
-    sql += " ORDER BY e.start_time";
+    // Happening-now events first, then by start time
+    sql += " ORDER BY (e.status = 'ONGOING') DESC, e.start_time";
 
     const [rows] = await pool.query<RowDataPacket[]>(sql, params);
     return Response.json(rows);
-    } catch (err) {
-    console.error("GET /api/events/[id] failed:", err);
-    return Response.json({ error: "Could not load event." }, { status: 500 });
+  } catch (err) {
+    console.error("GET /api/events failed:", err);
+    return Response.json({ error: "Could not load events." }, { status: 500 });
   }
 }

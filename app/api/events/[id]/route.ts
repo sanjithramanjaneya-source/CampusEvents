@@ -17,7 +17,7 @@ export async function GET(
       `SELECT
          e.event_id, e.event_name, e.description, e.category,
          e.start_time, e.end_time, e.expected_attendees, e.status,
-         e.organizer_id,
+         e.organizer_id, e.registration_deadline,
          v.venue_name, v.location, v.capacity,
          u.full_name AS organizer_name,
          CountActiveRegistrations(e.event_id) AS registered_count,
@@ -36,7 +36,7 @@ export async function GET(
     const user = await getCurrentUser();
 
     // Pending / cancelled events are visible only to admins and the organizer.
-    if (!["APPROVED", "ONGOING"].includes(event.status)) {
+    if (!["APPROVED", "ONGOING", "COMPLETED"].includes(event.status)) {
       const allowed =
         user && (user.role === "ADMIN" || user.user_id === event.organizer_id);
       if (!allowed) {

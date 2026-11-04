@@ -44,6 +44,8 @@ export async function POST(request: Request) {
     const startTime = String(body.startTime ?? "");
     const endTime = String(body.endTime ?? "");
     const attendees = Number(body.attendees);
+    const endDate = String(body.endDate ?? "") || date; // blank = same day
+    const deadline = String(body.deadline ?? ""); // blank = until the event starts
 
     const valid =
       name &&
@@ -54,7 +56,9 @@ export async function POST(request: Request) {
       Number.isInteger(attendees) && attendees > 0 &&
       /^\d{4}-\d{2}-\d{2}$/.test(date) &&
       /^\d{2}:\d{2}$/.test(startTime) &&
-      /^\d{2}:\d{2}$/.test(endTime);
+      /^\d{2}:\d{2}$/.test(endTime) &&
+      /^\d{4}-\d{2}-\d{2}$/.test(endDate) &&
+      (deadline === "" || /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(deadline));
     if (!valid) {
       return Response.json(
         { error: "Please fill all fields correctly." },
@@ -64,7 +68,7 @@ export async function POST(request: Request) {
 
     // The venue-clash, capacity and time rules live in the stored procedure.
     const [result] = await pool.query<RowDataPacket[][]>(
-      "CALL CreateEvent(?, ?, ?, ?, ?, ?, ?, ?)",
+      "CALL CreateEvent(?, ?, ?, ?, ?, ?, ?, ?, ?)",
       [
         name,
         description,
@@ -72,8 +76,9 @@ export async function POST(request: Request) {
         auth.user.user_id,
         venueId,
         `${date} ${startTime}:00`,
-        `${date} ${endTime}:00`,
+        `${endDate} ${endTime}:00`,
         attendees,
+        deadline ? `${deadline.replace("T", " ")}:00` : `${date} ${startTime}:00`,
       ]
     );
 

@@ -52,7 +52,7 @@ export async function DELETE(_request: Request, { params }: Ctx) {
       `UPDATE registrations
           SET status = 'CANCELLED'
         WHERE event_id = ? AND user_id = ? AND status = 'REGISTERED'
-          AND event_id IN (SELECT event_id FROM events WHERE end_time > NOW())`,
+          AND event_id IN (SELECT event_id FROM events WHERE start_time > NOW())`,
       [eventId, user.user_id]
     );
     if (result.affectedRows === 0) {

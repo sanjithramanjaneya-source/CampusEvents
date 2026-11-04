@@ -9,7 +9,8 @@ const SESSION_DAYS = 7;
 export type SessionUser = {
   user_id: number;
   full_name: string;
-  email: string;
+    email: string;
+  srn: string | null;
   role: "STUDENT" | "ORGANIZER" | "ADMIN";
 };
 

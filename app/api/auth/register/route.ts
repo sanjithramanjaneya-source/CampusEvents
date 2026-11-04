@@ -9,6 +9,12 @@ export async function POST(request: Request) {
     const srn = String(body.srn ?? "").trim().toUpperCase();
     const password = String(body.password ?? "");
 
+        if (!/^PES[12]UG\d{2}[A-Z]{2}\d{3}$/.test(srn)) {
+      return Response.json(
+        { error: "Enter a valid SRN, for example PES2UG24CS445." },
+        { status: 400 }
+      );
+    }
     if (!name || !email || !srn || password.length < 6) {
       return Response.json(
         { error: "Fill all fields. Password must be at least 6 characters." },

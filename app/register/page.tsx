@@ -90,7 +90,7 @@ export default function RegisterPage() {
               type="text"
               value={srn}
               onChange={(e) => setSrn(e.target.value)}
-              placeholder="Enter your SRN"
+              placeholder="e.g. PES2UG24CS455"  
               required
               className="w-full p-3 border border-gray-300 rounded-lg bg-white text-black"
             />
