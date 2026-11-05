@@ -57,3 +57,14 @@ export function registrationState(e: {
     return { open: false, label: "Registration closed", style: "bg-gray-100 text-gray-700" };
   return { open: true, label: "Registration open", style: "bg-green-100 text-green-700" };
 }
+
+
+
+// "29 Nov 2026, 9:00 am - 6:00 pm"  or, for multi-day events,
+// "29 Nov 2026, 9:00 am → 30 Nov 2026, 9:00 am"
+export function formatRange(start: string, end: string) {
+  const sameDay = formatDate(start) === formatDate(end);
+  return sameDay
+    ? `${formatDate(start)}, ${formatTime(start)} - ${formatTime(end)}`
+    : `${formatDateTime(start)} → ${formatDateTime(end)}`;
+}

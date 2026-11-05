@@ -16,6 +16,7 @@ export async function GET(request: Request) {
         e.expected_attendees, e.status,
         v.venue_name, v.location, v.capacity,
         u.full_name AS organizer_name,
+        EXISTS(SELECT 1 FROM event_banners b WHERE b.event_id = e.event_id) AS has_banner,
         CountActiveRegistrations(e.event_id) AS registered_count,
         EventCrowdLevel(e.event_id) AS crowd_level
       FROM events e
@@ -33,7 +34,9 @@ export async function GET(request: Request) {
       params.push(category);
     }
     // Happening-now events first, then by start time
-    sql += " ORDER BY (e.status = 'ONGOING') DESC, e.start_time";
+        sql += " ORDER BY (e.status = 'ONGOING') DESC, e.start_time";
+    const limit = Number(searchParams.get("limit"));
+    if (Number.isInteger(limit) && limit > 0 && limit <= 24) sql += ` LIMIT ${limit}`;
 
     const [rows] = await pool.query<RowDataPacket[]>(sql, params);
     return Response.json(rows);

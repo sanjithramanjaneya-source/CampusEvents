@@ -20,6 +20,7 @@ export async function GET(
          e.organizer_id, e.registration_deadline,
          v.venue_name, v.location, v.capacity,
          u.full_name AS organizer_name,
+         EXISTS(SELECT 1 FROM event_banners b WHERE b.event_id = e.event_id) AS has_banner,
          CountActiveRegistrations(e.event_id) AS registered_count,
          EventCrowdLevel(e.event_id) AS crowd_level
        FROM events e

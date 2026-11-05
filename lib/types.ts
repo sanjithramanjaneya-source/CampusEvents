@@ -13,7 +13,8 @@ export type EventItem = {
   organizer_name: string;
   registered_count: number;
     crowd_level: "LOW" | "MEDIUM" | "HIGH" | "FULL" | "UNKNOWN";
-  registration_deadline: string;
+    registration_deadline: string;
+  has_banner: number;
 };
 
 export type EventDetail = EventItem & {

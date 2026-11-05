@@ -5,6 +5,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { CalendarDays, Clock, MapPin, Users, ArrowLeft } from "lucide-react";
 import type { EventDetail } from "@/lib/types";
+import EventFeedback from "@/app/components/EventFeedback";
 import {
   formatDate,
   formatTime,
@@ -153,6 +154,14 @@ function EventDetails() {
 
         {event && state && (
           <div className="mt-6 rounded-2xl bg-white p-8 shadow-lg md:p-10">
+                        {event.has_banner ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={`/api/events/${event.event_id}/banner`}
+                alt={event.event_name}
+                className="mb-6 h-56 w-full rounded-xl object-cover"
+              />
+            ) : null}
             <div className="flex flex-wrap items-center gap-3">
               <span className="rounded-full bg-blue-100 px-4 py-1 text-sm font-medium text-blue-600">
                 {event.category}
@@ -220,7 +229,13 @@ function EventDetails() {
                   {notice.text}
                 </p>
               )}
+              
               {registrationArea(event)}
+              <EventFeedback
+                eventId={event.event_id}
+                status={event.status}
+                attended={event.my_registration === "ATTENDED"}
+              />
             </div>
           </div>
         )}

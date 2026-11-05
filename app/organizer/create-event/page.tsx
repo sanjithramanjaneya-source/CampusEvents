@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { Venue } from "@/lib/types";
 
+const input =
+  "w-full p-3 border border-gray-300 rounded-lg bg-white text-black";
+const label = "block text-gray-800 font-medium mb-2";
+
 export default function CreateEventPage() {
   const router = useRouter();
   const [eventName, setEventName] = useState("");
@@ -12,9 +16,12 @@ export default function CreateEventPage() {
   const [category, setCategory] = useState("Technical");
   const [date, setDate] = useState("");
   const [startTime, setStartTime] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [deadline, setDeadline] = useState("");
   const [venueId, setVenueId] = useState("");
   const [participants, setParticipants] = useState("");
+  const [banner, setBanner] = useState<File | null>(null);
   const [venues, setVenues] = useState<Venue[]>([]);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -44,7 +51,9 @@ export default function CreateEventPage() {
           venueId: Number(venueId),
           date,
           startTime,
+          endDate,
           endTime,
+          deadline,
           attendees: Number(participants),
         }),
       });
@@ -57,6 +66,20 @@ export default function CreateEventPage() {
       if (!res.ok) {
         setError(data.error || "Could not create the event.");
         return;
+      }
+
+      // Upload the banner (if any) now that the event exists.
+      if (banner && data.event_id) {
+        const form = new FormData();
+        form.append("banner", banner);
+        const up = await fetch(`/api/organizer/events/${data.event_id}/banner`, {
+          method: "POST",
+          body: form,
+        });
+        if (!up.ok) {
+          const upData = await up.json();
+          alert(`Event created, but the banner failed: ${upData.error}`);
+        }
       }
 
       alert("Event submitted! It will go live once an admin approves it.");
@@ -89,9 +112,7 @@ export default function CreateEventPage() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-gray-800 font-medium mb-2">
-                Event Name
-              </label>
+              <label className={label}>Event Name</label>
               <input
                 type="text"
                 value={eventName}
@@ -99,32 +120,38 @@ export default function CreateEventPage() {
                 placeholder="Enter event name"
                 required
                 maxLength={150}
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white text-black"
+                className={input}
               />
             </div>
 
             <div>
-              <label className="block text-gray-800 font-medium mb-2">
-                Event Description
-              </label>
+              <label className={label}>Event Description</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Describe your event"
                 required
                 rows={4}
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white text-black"
+                className={input}
               />
             </div>
 
             <div>
-              <label className="block text-gray-800 font-medium mb-2">
-                Category
-              </label>
+              <label className={label}>Event Banner (optional, JPG/PNG/WebP, max 2 MB)</label>
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(e) => setBanner(e.target.files?.[0] ?? null)}
+                className={input}
+              />
+            </div>
+
+            <div>
+              <label className={label}>Category</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white text-black"
+                className={input}
               >
                 <option value="Technical">Technical</option>
                 <option value="Cultural">Cultural</option>
@@ -134,56 +161,44 @@ export default function CreateEventPage() {
               </select>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-gray-800 font-medium mb-2">
-                  Event Date
-                </label>
-                <input
-                  type="date"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                  required
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white text-black"
-                />
+                <label className={label}>Start Date</label>
+                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} required className={input} />
               </div>
-
               <div>
-                <label className="block text-gray-800 font-medium mb-2">
-                  Start Time
-                </label>
-                <input
-                  type="time"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  required
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white text-black"
-                />
+                <label className={label}>Start Time</label>
+                <input type="time" value={startTime} onChange={(e) => setStartTime(e.target.value)} required className={input} />
               </div>
-
               <div>
-                <label className="block text-gray-800 font-medium mb-2">
-                  End Time
-                </label>
-                <input
-                  type="time"
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  required
-                  className="w-full p-3 border border-gray-300 rounded-lg bg-white text-black"
-                />
+                <label className={label}>End Date (leave empty if same day)</label>
+                <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} className={input} />
+              </div>
+              <div>
+                <label className={label}>End Time</label>
+                <input type="time" value={endTime} onChange={(e) => setEndTime(e.target.value)} required className={input} />
               </div>
             </div>
 
             <div>
-              <label className="block text-gray-800 font-medium mb-2">
-                Venue
+              <label className={label}>
+                Registration Deadline (leave empty to allow registration until the event starts)
               </label>
+              <input
+                type="datetime-local"
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                className={input}
+              />
+            </div>
+
+            <div>
+              <label className={label}>Venue</label>
               <select
                 value={venueId}
                 onChange={(e) => setVenueId(e.target.value)}
                 required
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white text-black"
+                className={input}
               >
                 <option value="">Select a venue</option>
                 {venues.map((v) => (
@@ -195,17 +210,15 @@ export default function CreateEventPage() {
             </div>
 
             <div>
-              <label className="block text-gray-800 font-medium mb-2">
-                Expected Participants
-              </label>
+              <label className={label}>Seats Available (maximum participants)</label>
               <input
                 type="number"
                 value={participants}
                 onChange={(e) => setParticipants(e.target.value)}
-                placeholder="Enter expected number of participants"
+                placeholder="Enter the number of seats"
                 min="1"
                 required
-                className="w-full p-3 border border-gray-300 rounded-lg bg-white text-black"
+                className={input}
               />
             </div>
 

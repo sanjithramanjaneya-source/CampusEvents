@@ -1,41 +1,6 @@
 import Link from "next/link";
-import {
-  CalendarDays,
-  Users,
-  MapPin,
-  ArrowRight,
-  Clock,
-} from "lucide-react";
-
-const events = [
-  {
-    title: "National Hackathon 2026",
-    category: "Technology",
-    date: "Nov 15, 2026",
-    time: "9:00 AM",
-    venue: "Innovation Center",
-    image:
-      "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=800",
-  },
-  {
-    title: "Cultural Fest - Rhythm",
-    category: "Cultural",
-    date: "Nov 20, 2026",
-    time: "5:00 PM",
-    venue: "University Auditorium",
-    image:
-      "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800",
-  },
-  {
-    title: "AI & Innovation Workshop",
-    category: "Workshop",
-    date: "Nov 25, 2026",
-    time: "10:00 AM",
-    venue: "Seminar Hall",
-    image:
-      "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800",
-  },
-];
+import { CalendarDays, Users, MapPin, ArrowRight } from "lucide-react";
+import UpcomingEvents from "@/app/components/UpcomingEvents";
 
 export default function Home() {
   return (
@@ -124,56 +89,7 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {events.map((event, index) => (
-            <div
-              key={index}
-              className="overflow-hidden rounded-2xl bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
-            >
-              <div className="relative">
-                <img
-                  src={event.image}
-                  alt={event.title}
-                  className="h-52 w-full object-cover"
-                />
-
-                <span className="absolute left-4 top-4 rounded-full bg-white px-4 py-1 text-sm font-medium text-blue-600">
-                  {event.category}
-                </span>
-              </div>
-
-              <div className="p-6">
-                <h3 className="text-xl font-bold text-slate-900">
-                  {event.title}
-                </h3>
-
-                <div className="mt-4 space-y-3 text-sm text-gray-600">
-                  <div className="flex items-center gap-2">
-                    <CalendarDays size={18} className="text-blue-600" />
-                    {event.date}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Clock size={18} className="text-blue-600" />
-                    {event.time}
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <MapPin size={18} className="text-blue-600" />
-                    {event.venue}
-                  </div>
-                </div>
-
-                <Link
-                  href={`/events/${index + 1}`}
-                  className="mt-6 flex items-center justify-center gap-2 rounded-lg bg-blue-600 py-3 font-medium text-white hover:bg-blue-700"
-                >
-                  Register Now <ArrowRight size={18} />
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
+        <UpcomingEvents />
       </section>
 
       {/* FOOTER */}
@@ -190,4 +106,3 @@ export default function Home() {
     </main>
   );
 }
-

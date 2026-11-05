@@ -4,14 +4,14 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { OrganizerEvent } from "@/lib/types";
-import { formatDate, formatTime } from "@/lib/format";
+import { formatRange } from "@/lib/format";
 
 const statusStyle: Record<string, { label: string; style: string }> = {
   PENDING: { label: "Pending approval", style: "bg-yellow-100 text-yellow-700" },
   APPROVED: { label: "Approved", style: "bg-green-100 text-green-700" },
   ONGOING: { label: "Ongoing", style: "bg-blue-100 text-blue-700" },
   COMPLETED: { label: "Completed", style: "bg-gray-100 text-gray-700" },
-    CANCELLED: { label: "Cancelled", style: "bg-red-100 text-red-700" },
+  CANCELLED: { label: "Cancelled", style: "bg-red-100 text-red-700" },
   REJECTED: { label: "Rejected", style: "bg-red-100 text-red-700" },
 };
 
@@ -141,13 +141,11 @@ export default function OrganizerPage() {
                       {event.event_name}
                     </Link>
                     <p className="text-gray-600 mt-1">
-                      📅 {formatDate(event.start_time)},{" "}
-                      {formatTime(event.start_time)} - {formatTime(event.end_time)}
+                      📅 {formatRange(event.start_time, event.end_time)}
                     </p>
                     <p className="text-gray-600 mt-1">📍 {event.venue_name}</p>
                     <p className="text-gray-600 mt-1">
-                      👥 {event.registered_count} registered (expected{" "}
-                      {event.expected_attendees})
+                      👥 {event.registered_count} / {event.expected_attendees} seats taken
                     </p>
                   </div>
 
@@ -157,6 +155,12 @@ export default function OrganizerPage() {
                     >
                       {s.label}
                     </span>
+                    <Link
+                      href={`/organizer/events/${event.event_id}`}
+                      className="text-blue-600 border border-blue-300 px-4 py-2 rounded-lg hover:bg-blue-50"
+                    >
+                      Manage
+                    </Link>
                     {canCancel && (
                       <button
                         onClick={() =>
