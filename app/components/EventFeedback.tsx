@@ -48,7 +48,20 @@ export default function EventFeedback({
       .catch(() => setError("Could not load reviews."));
   }, [eventId, status, reloadKey]);
 
-  if (status !== "COMPLETED") return null;
+    if (status !== "COMPLETED") return null;
+
+  async function removeMine() {
+    if (!confirm("Delete your review?")) return;
+    const res = await fetch(`/api/events/${eventId}/feedback`, { method: "DELETE" });
+    const body = await res.json();
+    if (!res.ok) {
+      alert(body.error || "Could not delete the review.");
+      return;
+    }
+    setRating(0);
+    setComment("");
+    setReloadKey((k) => k + 1);
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -58,7 +71,7 @@ export default function EventFeedback({
     }
     setBusy(true);
     const res = await fetch(`/api/events/${eventId}/feedback`, {
-      method: "POST",
+      method: data?.mine ? "PUT" : "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ rating, comment }),
     });
@@ -111,7 +124,16 @@ export default function EventFeedback({
           {attended && (
             <form onSubmit={submit} className="mt-6 rounded-lg bg-gray-50 p-4">
               <p className="font-medium text-gray-800">
-                {data.mine ? "Update your review" : "Rate this event"}
+                                {data.mine ? "Update your review" : "Rate this event"}
+                {data.mine && (
+                  <button
+                    type="button"
+                    onClick={removeMine}
+                    className="ml-4 text-sm font-normal text-red-600 hover:underline"
+                  >
+                    Delete my review
+                  </button>
+                )}
               </p>
               <div className="mt-2 flex gap-1 text-3xl text-yellow-500">
                 {[1, 2, 3, 4, 5].map((n) => (
@@ -133,7 +155,7 @@ export default function EventFeedback({
                 disabled={busy}
                 className="mt-3 rounded-lg bg-blue-600 px-5 py-2 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
               >
-                {busy ? "Saving..." : "Submit review"}
+                {busy ? "Saving..." : data.mine ? "Update review" : "Submit review"}
               </button>
             </form>
           )}

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import type { AdminEvent, AdminOverview, AdminUser } from "@/lib/types";
 import { formatDate, formatTime } from "@/lib/format";
+import CalendarLoad from "@/app/components/CalendarLoad";
 
 type Panel = "students" | "organizers" | "reports" | null;
 
@@ -302,7 +303,8 @@ export default function AdminPage() {
 
         {/* Reports panel */}
         {panel === "reports" && overview && (
-          <div className="mt-10 space-y-6">
+                    <div className="mt-10 space-y-6">
+            <CalendarLoad data={overview.calendar} />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-white rounded-xl shadow-sm p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-4">
@@ -334,7 +336,9 @@ export default function AdminPage() {
                 <ul className="space-y-2">
                   {overview.top_events.map((t) => (
                     <li key={t.event_id} className="flex justify-between text-gray-700">
-                      <span>{t.event_name}</span>
+                                            <span>
+                        {t.popularity_rank}. {t.event_name}
+                      </span>
                       <span className="font-semibold">
                         {t.registrations} / {t.capacity}
                       </span>

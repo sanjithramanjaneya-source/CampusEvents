@@ -74,8 +74,10 @@ export type AdminOverview = {
     event_id: number;
     event_name: string;
     capacity: number;
-    registrations: number;
+        registrations: number;
+    popularity_rank: number;
   }[];
+    calendar: { cal_date: string; events: number }[];
   recent_activity: {
     audit_id: number;
     action_type: string;
